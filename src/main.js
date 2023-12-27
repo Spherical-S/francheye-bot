@@ -11,6 +11,7 @@ const client = new Client({
 
 client.on("ready", () => {
     console.log(`Logged in as ${client.user.tag}!`)
+	sendFrancheyeMessage();
 })
 
 function sendFrancheyeMessage(){
@@ -40,10 +41,11 @@ client.on("messageCreate", (msg) => {
     }
 })
 
+client.login(process.env.TOKEN);
+
 var http = require('http');
 http.createServer(function (req, res) {
     console.log(`Just got a request at ${req.url}!`)
-	client.login(process.env.TOKEN);
     res.write('Yo!');
     res.end();
 }).listen(process.env.PORT || 3000);
