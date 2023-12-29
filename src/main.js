@@ -11,7 +11,6 @@ const client = new Client({
 
 client.on("ready", () => {
     console.log(`Logged in as ${client.user.tag}!`)
-	sendFrancheyeMessage();
 })
 
 function sendFrancheyeMessage(){
@@ -28,6 +27,7 @@ function sendFrancheyeMessage(){
                 .setDescription("https://francheye.com/\n\nHead over to " + pointTo.toString() + " to start Digital Franchising today!")
                 .setImage("https://cdn.discordapp.com/attachments/1187876727934955581/1188175394067722250/yumgif.gif?ex=65999191&is=65871c91&hm=6fe2c42b85af999518a68f0527af52fffe101ad1b04bad99ec817ece4170c20a&");
             messageChannel.send({ embeds: [embed] });
+			console.log("Message sent!");
         })
         .catch(console.error);
 }
