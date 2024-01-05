@@ -1,6 +1,7 @@
 require("dotenv").config();
 var cron = require("cron");
 const { Client, GatewayIntentBits, EmbedBuilder } = require("discord.js");
+const eventHandler = require("./handlers/eventHandler");
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -9,9 +10,7 @@ const client = new Client({
     ]
 });
 
-client.on("ready", () => {
-    console.log(`Logged in as ${client.user.tag}!`)
-})
+eventHandler(client)
 
 function sendFrancheyeMessage(){
     var pointTo;
@@ -34,11 +33,5 @@ function sendFrancheyeMessage(){
 
 let messageManager = new cron.CronJob('00 00 00,06,12,18 * * *', sendFrancheyeMessage);
 messageManager.start();
-
-client.on("messageCreate", (msg) => {
-    if(msg.content === "!ping"){
-        msg.channel.send("pong");
-    }
-})
 
 client.login(process.env.TOKEN);
