@@ -1,4 +1,11 @@
-const { Client, Interaction, ApplicationCommandOptionType, EmbedBuilder } = require("discord.js");
+const {
+    Client,
+    Interaction,
+    ApplicationCommandOptionType,
+    EmbedBuilder,
+    ButtonBuilder,
+    ActionRowBuilder,
+} = require("discord.js");
 
 async function getYoutubeLeaderboards() {
     try {
@@ -13,6 +20,57 @@ async function getYoutubeLeaderboards() {
     } catch (error) {
         return [false, {}];
     }
+}
+
+function organizePages(creators, page, r){
+    for(let i = 0, count = 0; i<page[1]; i++){
+
+        creators.push([]);
+
+        for(let j = 0; j<10; j++){
+
+            if(count >= r.length){
+                break;
+            }
+
+            let lifeViews = r[count].analytics.youtube.lifeTimeTotalViews + "";
+            let monthViews = r[count].analytics.youtube.thirtyDaysViews + "";
+
+            if(r[count].analytics.youtube.lifeTimeTotalViews > 999999){
+                lifeViews = (Math.round(r[count].analytics.youtube.lifeTimeTotalViews / 100000) / 10) + "Mil";
+            }
+
+            if(r[count].analytics.youtube.thirtyDaysViews > 999999){
+                monthViews = (Math.round(r[count].analytics.youtube.thirtyDaysViews / 100000) / 10) + "Mil";
+            }
+
+            let name = `__${count+1}. ${r[count].data.name}__`;
+            let value = "*Lifetime views*: " + lifeViews + "\n*Past 30 days*: "+ monthViews;
+            let inline = true;
+
+            if(count == 0){
+                name = `__🥇 ${r[count].data.name}__`;
+            }
+            if(count == 1){
+                name = `__🥈 ${r[count].data.name}__`;
+            }
+            if(count == 2){
+                name = `__🥉 ${r[count].data.name}__`;
+            }
+
+            creators[i].push({
+                name: name,
+                value: value,
+                inline: inline,
+            });
+            
+            count++;
+
+        }
+    }
+
+    return creators;
+
 }
 
 
@@ -81,54 +139,23 @@ module.exports = {
 
             const r = leaderboards[1];
 
-            for(let i = 0, count = 0; i<page[1]; i++){
+            creators = organizePages(creators, page, r);
 
-                creators.push([]);
+            const nextButton = new ButtonBuilder()
+                .setCustomId("next")
+                .setLabel("Next")
+                .setStyle("Primary");
+            
+            const prevButton = new ButtonBuilder()
+                .setCustomId("prev")
+                .setLabel("Previous")
+                .setStyle("Primary");
 
-                for(let j = 0; j<10; j++){
-
-                    if(count >= r.length){
-                        break;
-                    }
-
-                    let lifeViews = r[count].analytics.youtube.lifeTimeTotalViews + "";
-                    let monthViews = r[count].analytics.youtube.thirtyDaysViews + "";
-
-                    if(r[count].analytics.youtube.lifeTimeTotalViews > 999999){
-                        lifeViews = (Math.round(r[count].analytics.youtube.lifeTimeTotalViews / 100000) / 10) + "Mil";
-                    }
-
-                    if(r[count].analytics.youtube.thirtyDaysViews > 999999){
-                        monthViews = (Math.round(r[count].analytics.youtube.thirtyDaysViews / 100000) / 10) + "Mil";
-                    }
-
-                    let name = `__${count+1}. ${r[count].data.name}__`;
-                    let value = "*Lifetime views*: " + lifeViews + "\n*Past 30 days*: "+ monthViews;
-                    let inline = true;
-
-                    if(count == 0){
-                        name = `__🥇 ${r[count].data.name}__`;
-                    }
-                    if(count == 1){
-                        name = `__🥈 ${r[count].data.name}__`;
-                    }
-                    if(count == 2){
-                        name = `__🥉 ${r[count].data.name}__`;
-                    }
-
-                    creators[i].push({
-                        name: name,
-                        value: value,
-                        inline: inline,
-                    });
-                    
-                    count++;
-
-                }
-            }
+            const row = new ActionRowBuilder()
+                .addComponents(prevButton, nextButton);
 
             const embed = new EmbedBuilder()
-                .setColor(0x23dfeb)
+                .setColor(0x8abeff)
                 .setTitle("__**Top " + amount + " - Youtube**__")
                 .setTimestamp();
 
@@ -143,7 +170,7 @@ module.exports = {
                 }
             }
             
-            interaction.reply( {embeds: [embed]} );
+            await interaction.reply( {embeds: [embed], components: [row],} );
 
         }else if(platform == 2){
             interaction.reply({content: 'Sorry, tiktok is not available at the moment.', empheral: true});
