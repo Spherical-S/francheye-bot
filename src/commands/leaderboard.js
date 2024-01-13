@@ -133,7 +133,7 @@ module.exports = {
             const leaderboards = await getYoutubeLeaderboards();
 
             if(!leaderboards[0]){
-                interaction.reply({content: 'Something went wrong.', empheral: true});
+                interaction.reply({content: 'Something went wrong.', ephemeral: true});
                 return;
             }
 
@@ -142,12 +142,12 @@ module.exports = {
             creators = organizePages(creators, page, r);
 
             const nextButton = new ButtonBuilder()
-                .setCustomId("next")
+                .setCustomId("nextYt")
                 .setLabel("Next")
                 .setStyle("Primary");
             
             const prevButton = new ButtonBuilder()
-                .setCustomId("prev")
+                .setCustomId("prevYt")
                 .setLabel("Previous")
                 .setStyle("Primary");
 
@@ -157,7 +157,8 @@ module.exports = {
             const embed = new EmbedBuilder()
                 .setColor(0x8abeff)
                 .setTitle("__**Top " + amount + " - Youtube**__")
-                .setTimestamp();
+                .setTimestamp()
+                .setFooter({ text: "" + page[0] + "/" + page[1] });
 
             for(let i = 0, count = 1; i<creators[0].length; i++){
                 if(count == 3){
@@ -173,7 +174,7 @@ module.exports = {
             await interaction.reply( {embeds: [embed], components: [row],} );
 
         }else if(platform == 2){
-            interaction.reply({content: 'Sorry, tiktok is not available at the moment.', empheral: true});
+            interaction.reply({content: 'Sorry, tiktok is not available at the moment.', ephemeral: true});
         }
 
     },
