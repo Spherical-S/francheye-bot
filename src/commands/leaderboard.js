@@ -6,72 +6,109 @@ const {
     ButtonBuilder,
     ActionRowBuilder,
 } = require("discord.js");
+const getTikTokLeaderboards = require("../utils/getTikTokLeaderboards");
+const getYoutubeLeaderboards = require("../utils/getYoutubeLeaderboards");
+const organizePages = require("../utils/organizePages");
 
-async function getYoutubeLeaderboards() {
-    try {
-        const response = await fetch("https://successful-pink-tutu.cyclic.app/api/v1/leaderboard/youtube");
-        const r = await response.json();
+// async function getYoutubeLeaderboards() {
+//     try {
+//         const response = await fetch("https://successful-pink-tutu.cyclic.app/api/v1/leaderboard/youtube");
+//         const r = await response.json();
 
-        if (response.status == 200) {
-            return [true, r];
-        } else {
-            return [false, {}];
-        }
-    } catch (error) {
-        return [false, {}];
-    }
-}
+//         if (response.status == 200) {
+//             return [true, r];
+//         } else {
+//             return [false, {}];
+//         }
+//     } catch (error) {
+//         return [false, {}];
+//     }
+// }
 
-function organizePages(creators, page, r){
-    for(let i = 0, count = 0; i<page[1]; i++){
+// async function getTiktokLeaderboards() {
+//     try{
+//         const response = await fetch("https://successful-pink-tutu.cyclic.app/api/v1/leaderboard/tiktok");
+//         const r = await response.json();
 
-        creators.push([]);
+//         if(response.status == 200){
+//             return [true, r];
+//         } else {
+//             return [false, {}];
+//         }
+//     } catch (error) {
+//         return [false, {}];
+//     }
+// }
 
-        for(let j = 0; j<10; j++){
+// function organizePages(creators, page, r, platform){
+//     for(let i = 0, count = 0; i<page[1]; i++){
 
-            if(count >= r.length){
-                break;
-            }
+//         creators.push([]);
 
-            let lifeViews = r[count].analytics.youtube.lifeTimeTotalViews + "";
-            let monthViews = r[count].analytics.youtube.thirtyDaysViews + "";
+//         for(let j = 0; j<10; j++){
 
-            if(r[count].analytics.youtube.lifeTimeTotalViews > 999999){
-                lifeViews = (Math.round(r[count].analytics.youtube.lifeTimeTotalViews / 100000) / 10) + "Mil";
-            }
+//             if(count >= r.length){
+//                 break;
+//             }
 
-            if(r[count].analytics.youtube.thirtyDaysViews > 999999){
-                monthViews = (Math.round(r[count].analytics.youtube.thirtyDaysViews / 100000) / 10) + "Mil";
-            }
+//             let lifeViews = "";
+//             let monthViews = "";
 
-            let name = `__${count+1}. ${r[count].data.name}__`;
-            let value = "*Lifetime views*: " + lifeViews + "\n*Past 30 days*: "+ monthViews;
-            let inline = true;
+//             if(platform == 1){
+//                 lifeViews = r[count].analytics.youtube.total.lifeTimeTotalViews + "";
+//                 monthViews = r[count].analytics.youtube.total.thirtyDaysViews + "";
 
-            if(count == 0){
-                name = `__🥇 ${r[count].data.name}__`;
-            }
-            if(count == 1){
-                name = `__🥈 ${r[count].data.name}__`;
-            }
-            if(count == 2){
-                name = `__🥉 ${r[count].data.name}__`;
-            }
+//                 if(r[count].analytics.youtube.total.lifeTimeTotalViews > 999999){
+//                     lifeViews = (Math.round(r[count].analytics.youtube.total.lifeTimeTotalViews / 100000) / 10) + "Mil";
+//                 }
 
-            creators[i].push({
-                name: name,
-                value: value,
-                inline: inline,
-            });
+//                 //if(r[count].analytics.youtube.total.thirtyDaysViews > 999999){
+//                 //    monthViews = (Math.round(r[count].analytics.youtube.total.thirtyDaysViews / 100000) / 10) + "Mil";
+//                 //}
+//                 monthViews = "Null";
+//             }
+
+//             if(platform == 2){
+//                 lifeViews = r[count].analytics.tikTok.total.lifeTimeTotalViews + "";
+//                 monthViews = r[count].analytics.tikTok.total.thirtyDays + "";
+
+//                 if(r[count].analytics.tikTok.total.lifeTimeTotalViews > 999999){
+//                     lifeViews = (Math.round(r[count].analytics.tikTok.total.lifeTimeTotalViews / 100000) / 10) + "Mil";
+//                 }
+
+//                 if(r[count].analytics.tikTok.total.thirtyDays > 999999){
+//                     monthViews = (Math.round(r[count].analytics.tikTok.total.thirtyDays / 100000) / 10) + "Mil";
+//                 }
+//             }
+
+//             let name = `__${count+1}. ${r[count].data.name}__`;
+//             let value = "*Lifetime views*: " + lifeViews + "\n*Past 30 days*: "+ monthViews;
+//             let inline = true;
+
+//             if(count == 0){
+//                 name = `__🥇 ${r[count].data.name}__`;
+//             }
+//             if(count == 1){
+//                 name = `__🥈 ${r[count].data.name}__`;
+//             }
+//             if(count == 2){
+//                 name = `__🥉 ${r[count].data.name}__`;
+//             }
+
+//             creators[i].push({
+//                 name: name,
+//                 value: value,
+//                 inline: inline,
+//             });
             
-            count++;
+//             count++;
 
-        }
-    }
+//         }
+//     }
 
-    return creators;
+//     return creators;
 
-}
+// }
 
 
 
@@ -139,7 +176,7 @@ module.exports = {
 
             const r = leaderboards[1];
 
-            creators = organizePages(creators, page, r);
+            creators = organizePages(creators, page, r, platform);
 
             const nextButton = new ButtonBuilder()
                 .setCustomId("nextYt")
@@ -173,8 +210,51 @@ module.exports = {
             
             await interaction.reply( {embeds: [embed], components: [row],} );
 
-        }else if(platform == 2){
-            interaction.reply({content: 'Sorry, tiktok is not available at the moment.', ephemeral: true});
+        }else if (platform == 2){
+
+            const leaderboards = await getTikTokLeaderboards();
+
+            if(!leaderboards[0]){
+                interaction.reply({content: 'Something went wrong.', ephemeral: true});
+                return;
+            }
+
+            const r = leaderboards[1];
+
+            creators = organizePages(creators, page, r, platform);
+
+            const nextButton = new ButtonBuilder()
+                .setCustomId("nextTT")
+                .setLabel("Next")
+                .setStyle("Primary");
+            
+            const prevButton = new ButtonBuilder()
+                .setCustomId("prevTT")
+                .setLabel("Previous")
+                .setStyle("Primary");
+
+            const row = new ActionRowBuilder()
+                .addComponents(prevButton, nextButton);
+
+            const embed = new EmbedBuilder()
+                .setColor(0x8abeff)
+                .setTitle("__**Top " + amount + " - TikTok**__")
+                .setTimestamp()
+                .setFooter({ text: "" + page[0] + "/" + page[1] });
+
+            for(let i = 0, count = 1; i<creators[0].length; i++){
+                if(count == 3){
+                    embed.addFields( {name: '\u200b', value: '\u200b', inline: true} );
+                    count = 1;
+                    i--;
+                }else{
+                    embed.addFields(creators[0][i]);
+                    count++;
+                }
+            }
+            
+            await interaction.reply( {embeds: [embed], components: [row],} );
+
         }
 
     },
